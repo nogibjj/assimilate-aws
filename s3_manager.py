@@ -3,6 +3,22 @@
 import boto3
 import click
 
+#write a function that takes a list of buckets and deletes them
+def delete_buckets(buckets):
+    """"Delete a list of buckets"""
+
+    print(f"Deleting buckets...{buckets}")
+    s3 = boto3.client("s3")
+    for bucket in buckets:
+        s3.delete_bucket(Bucket=bucket)
+
+#write a function that returns a list of buckets that match a pattern
+def list_buckets_by_pattern(pattern):
+    s3 = boto3.client("s3")
+    response = s3.list_buckets()
+    buckets = [bucket["Name"] for bucket in response["Buckets"] if pattern in bucket["Name"]]
+    return buckets
+
 #write a function that returns all the buckets in s3
 def list_buckets():
     s3 = boto3.client("s3")
@@ -28,7 +44,24 @@ def list_empty_buckets(buckets):
 @click.option("--delete", is_flag=True, help="Delete empty buckets")
 # add click option
 @click.option("--bucket", help="Name of bucket to delete")
-def main(empty, delete, bucket):
+# add click option
+@click.option("--pattern", help="Pattern to match in bucket name")
+def main(empty, delete, bucket, pattern):
+    """List and delete S3 buckets
+    
+    Examples:
+    python s3_manager.py --empty
+    python s3_manager.py --delete --bucket my-bucket
+    python s3_manager.py --delete --pattern my-bucket
+    
+    """
+    # if pattern is specified, delete buckets that match the pattern
+    if pattern:
+        buckets = list_buckets_by_pattern(pattern)
+        if delete:
+            delete_buckets(buckets)
+        else:
+            print(buckets)
     # if empty flag is set
     if empty:
         # find empty buckets
