@@ -3,14 +3,19 @@
 import boto3
 import click
 
-#write a function that takes a list of buckets and deletes them
+#write a function that takes a list of buckets and deletes all of the contents of each bucket and then deletes the bucket
 def delete_buckets(buckets):
-    """"Delete a list of buckets"""
+    """Delete all the contents of a list of buckets and then delete the buckets"""
 
-    print(f"Deleting buckets...{buckets}")
     s3 = boto3.client("s3")
     for bucket in buckets:
+        print(f"Deleting bucket {bucket} and all of its contents")
+        response = s3.list_objects_v2(Bucket=bucket)
+        if "Contents" in response:
+            objects = [object["Key"] for object in response["Contents"]]
+            s3.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": object} for object in objects]})
         s3.delete_bucket(Bucket=bucket)
+
 
 #write a function that returns a list of buckets that match a pattern
 def list_buckets_by_pattern(pattern):
