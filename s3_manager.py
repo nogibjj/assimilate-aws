@@ -3,18 +3,22 @@
 import boto3
 import click
 
-#write a function that takes a list of buckets and deletes all of the contents of each bucket and then deletes the bucket
+#write a function that recursively deletes all objects in a list of buckets
 def delete_buckets(buckets):
-    """Delete all the contents of a list of buckets and then delete the buckets"""
-
     s3 = boto3.client("s3")
+    print(f"Deleting {len(buckets)} buckets with the following names: {buckets}")
     for bucket in buckets:
-        print(f"Deleting bucket {bucket} and all of its contents")
+        print(f"Deleting bucket {bucket} with full uri s3://{bucket}")
         response = s3.list_objects_v2(Bucket=bucket)
         if "Contents" in response:
-            objects = [object["Key"] for object in response["Contents"]]
-            s3.delete_objects(Bucket=bucket, Delete={"Objects": [{"Key": object} for object in objects]})
+            for obj in response["Contents"]:
+                s3.delete_object(Bucket=bucket, Key=obj["Key"])
+        # after all objects are deleted delete the bucket using ListObjectsV2 to get the bucket name
         s3.delete_bucket(Bucket=bucket)
+
+
+    
+
 
 
 #write a function that returns a list of buckets that match a pattern
@@ -41,6 +45,13 @@ def list_empty_buckets(buckets):
             empty_buckets.append(bucket)
     return empty_buckets
 
+#write a function that finds s3 buckets last over one year old
+def list_old_buckets():
+    s3 = boto3.client("s3")
+    response = s3.list_buckets()
+    buckets = [bucket["Name"] for bucket in response["Buckets"] if bucket["CreationDate"].year < 2020]
+    return buckets
+
 # add click command
 @click.command()
 # add click option
@@ -51,7 +62,9 @@ def list_empty_buckets(buckets):
 @click.option("--bucket", help="Name of bucket to delete")
 # add click option
 @click.option("--pattern", help="Pattern to match in bucket name")
-def main(empty, delete, bucket, pattern):
+# add click option
+@click.option("--old", is_flag=True, help="Find old buckets")
+def main(empty, delete, bucket, pattern, old):
     """List and delete S3 buckets
     
     Examples:
@@ -60,6 +73,12 @@ def main(empty, delete, bucket, pattern):
     python s3_manager.py --delete --pattern my-bucket
     
     """
+    if old:
+        buckets = list_old_buckets()
+        print(buckets)
+    # delete old buckets
+    elif delete and bucket:
+        delete_buckets([bucket])
     # if pattern is specified, delete buckets that match the pattern
     if pattern:
         buckets = list_buckets_by_pattern(pattern)
@@ -73,14 +92,19 @@ def main(empty, delete, bucket, pattern):
         empty_buckets = list_empty_buckets(list_buckets())
         # print empty buckets
         for bucket in empty_buckets:
-            #print green text
-            click.style(click.echo(bucket), fg="orange")
+            #print blue bg with white text
+            click.echo(click.style(bucket, bg='white', fg='black', bold=True))
+        # if delete flag is set
+        if delete:
+            # delete empty buckets
+            delete_buckets(empty_buckets)
     # if delete flag is set
     if delete:
-        # create s3 client
-        s3 = boto3.client("s3")
-        # delete bucket
-        s3.delete_bucket(Bucket=bucket)
+        # delete bucket and objects in bucket
+        delete_buckets([bucket])
+
+
+
 
 
 # call function via command line
