@@ -7,6 +7,6 @@ def transcribe_mp4(filename):
     # upload file to s3
     s3.upload_file(filename, "my-bucket", filename)
     # create transcribe client
-    #transcribe = boto3.client("transcribe")
+    # transcribe = boto3.client("transcribe")
     # start transcription job
-    #transcribe.start_transcription_job
+    # transcribe.start_transcription_job
