@@ -1,10 +1,32 @@
 #!/usr/bin/env python
-
-
+import pathlib
 import boto3
 import click
 import requests
 import json
+import openai
+import os
+
+
+
+#write a functions that summarizes a transcription using the openai api
+def summarize_transcription(text):
+    """Summarize a transcription"""
+
+    #truncate the text to 4000 characters
+    truncate_text = text[:4000]
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    full_text_prompt = f"{truncate_text}\n\nTl;dr"
+    response = openai.Completion.create(
+        engine="text-davinci-002",
+        prompt=full_text_prompt,
+        max_tokens=256,
+        temperature=0.7,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    return response.choices[0].text
 
 def transcribe_all_files(bucket_name, pattern="mp4"):
     """Transcribe all files in a bucket"""
@@ -51,35 +73,38 @@ def get_transcription_uri(job_name):
 def download_transcription(uri_json, filename):
     """Download a transcription"""
 
-    response = requests.get(uri_json)
-    with open(filename, "w") as f:
+    response = requests.get(uri_json, timeout=30)
+    with open(filename, "w", encoding="utf-8") as f:
         f.write(response.text)
-    
+
+
 # read the transcription from from a file and return only the text
 def read_transcription(filename):
     """Read a transcription"""
 
-    with open(filename, "r") as f:
+    with open(filename, "r", encoding="utf-8") as f:
         data = json.load(f)
     return data["results"]["transcripts"][0]["transcript"]
-
 
 # write a function that takes a transcription job name, downloads the transcription, and returns the text
 def get_transcription_text(job_name):
     """Get the text of a transcription"""
 
     uri_json = get_transcription_uri(job_name)
-    #print(f"Downloading transcription from {uri_json}")
+    # print(f"Downloading transcription from {uri_json}")
     filename = f"{job_name}.json"
     print(f"Saving transcription to {filename}")
     download_transcription(uri_json, filename)
     print(f"Transcription downloaded to {filename}")
     text = read_transcription(filename)
+    # delete the file
+    pathlib.Path(filename).unlink()
     return text
 
 @click.group()
 def cli():
     pass
+
 
 @cli.command("transcribe")
 @click.argument("bucket_name")
@@ -117,6 +142,17 @@ def get_results(job_name):
     result = get_transcription_text(job_name)
     print(result)
 
+@cli.command("summarize")
+@click.argument("job_name")
+def summarize(job_name):
+    """Summarize a transcription job
+
+    Example: python aws_transcriber.py summarize my-job
+    """
+
+    text = get_transcription_text(job_name)
+    result = summarize_transcription(text)
+    print(result)
 
 if __name__ == "__main__":
     # pylint: disable=no-value-for-parameter
