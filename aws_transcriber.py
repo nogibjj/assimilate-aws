@@ -24,34 +24,46 @@ def transcribe_all_files(bucket_name, pattern="mp4"):
                 LanguageCode="en-US",
             )
         print(f"Response: {response}")
-    #return a list of transcription job names
+    # return a list of transcription job names
     return [obj["Key"] for obj in response["Contents"] if pattern in obj["Key"]]
 
-#write a function that lists all the transcription jobs
+
 def list_transcription_jobs():
+    """List all transcription jobs"""
+
     transcribe = boto3.client("transcribe")
     response = transcribe.list_transcription_jobs()
     return response["TranscriptionJobSummaries"]
+
+#write a function that retrieves the transcription job results
+def get_transcription_results(job_name):
+    """Get the results of a transcription job"""
+
+    transcribe = boto3.client("transcribe")
+    response = transcribe.get_transcription_job(TranscriptionJobName=job_name)
+    return response["TranscriptionJob"]["Transcript"]["TranscriptFileUri"]
 
 @click.group()
 def cli():
     pass
 
+
 @cli.command("transcribe")
 @click.argument("bucket_name")
-def transcribe(bucket_name):
+def transcribe_all(bucket_name):
     """Transcribe all files in a bucket
-    
+
     Example: python aws_transcriber.py transcribe my-bucket
 
     """
     result = transcribe_all_files(bucket_name)
     print(f"Transcribed {len(result)} files")
 
-@cli.command("list")
-def list():
+
+@cli.command("list-jobs")
+def list_jobs():
     """List all transcription jobs
-    
+
     Example: python aws_transcriber.py list
     """
 
@@ -60,13 +72,7 @@ def list():
     for job in result:
         print(job["TranscriptionJobName"])
 
-    
-    
-
 
 if __name__ == "__main__":
     # pylint: disable=no-value-for-parameter
     cli()
-
-
-
