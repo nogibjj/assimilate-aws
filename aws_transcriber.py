@@ -8,12 +8,11 @@ import openai
 import os
 
 
-
-#write a functions that summarizes a transcription using the openai api
+# write a functions that summarizes a transcription using the openai api
 def summarize_transcription(text):
     """Summarize a transcription"""
 
-    #truncate the text to 4000 characters
+    # truncate the text to 4000 characters
     truncate_text = text[:4000]
     openai.api_key = os.getenv("OPENAI_API_KEY")
     full_text_prompt = f"{truncate_text}\n\nTl;dr"
@@ -24,9 +23,10 @@ def summarize_transcription(text):
         temperature=0.7,
         top_p=1,
         frequency_penalty=0,
-        presence_penalty=0
+        presence_penalty=0,
     )
     return response.choices[0].text
+
 
 def transcribe_all_files(bucket_name, pattern="mp4"):
     """Transcribe all files in a bucket"""
@@ -86,6 +86,7 @@ def read_transcription(filename):
         data = json.load(f)
     return data["results"]["transcripts"][0]["transcript"]
 
+
 # write a function that takes a transcription job name, downloads the transcription, and returns the text
 def get_transcription_text(job_name):
     """Get the text of a transcription"""
@@ -100,6 +101,7 @@ def get_transcription_text(job_name):
     # delete the file
     pathlib.Path(filename).unlink()
     return text
+
 
 @click.group()
 def cli():
@@ -142,6 +144,7 @@ def get_results(job_name):
     result = get_transcription_text(job_name)
     print(result)
 
+
 @cli.command("summarize")
 @click.argument("job_name")
 def summarize(job_name):
@@ -153,6 +156,7 @@ def summarize(job_name):
     text = get_transcription_text(job_name)
     result = summarize_transcription(text)
     print(result)
+
 
 if __name__ == "__main__":
     # pylint: disable=no-value-for-parameter
