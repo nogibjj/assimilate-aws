@@ -27,16 +27,18 @@ def submit_question(text):
     )["choices"][0]["text"].strip(" \n")
     return result
 
+
 @click.command()
-@click.argument('text')
+@click.argument("text")
 def main(text):
     """This is the main function that you ask the OpenAI API a question to get an answer
-    
+
     example: python questionAnswerCLI.py "Who won the 2020 Summer Olympics
-    
+
     """
     print(submit_question(text))
 
+
 if __name__ == "__main__":
-    #pylint: disable=no-value-for-parameter
+    # pylint: disable=no-value-for-parameter
     main()
