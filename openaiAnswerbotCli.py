@@ -22,13 +22,14 @@ def extract_from_url(url):
         print(paragraph.text)
         text += paragraph.text
 
-    #return a max of 1500 characters
+    # return a max of 1500 characters
     return text[:1500]
 
-#write an openai function that summarizes the text
+
+# write an openai function that summarizes the text
 def summarize(text):
     openai.api_key = os.getenv("OPENAI_API_KEY")
-    #create a tl;dr prompt
+    # create a tl;dr prompt
     prompt = f"{text}\n\nTl;dr"
 
     result = openai.Completion.create(
@@ -77,6 +78,7 @@ def question(text):
 
     """
     print(submit_question(text))
+
 
 # build a click command that takes a url and summarizes it
 @cli.command("summarize")
