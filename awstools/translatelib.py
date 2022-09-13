@@ -13,3 +13,11 @@ def translate_text(text, source, target):
         result["SourceLanguageCode"],
         result["TargetLanguageCode"],
     )
+
+
+def list_languages():
+    """List available languages"""
+
+    client = boto3.client("translate")
+    result = client.list_languages()
+    return result["Languages"]
