@@ -3,6 +3,11 @@
 # assimilate-aws
 A deep dive into programmatically mastering AWS
 
+## Tiny Container Demo
+![phrase-repeater-docker](https://user-images.githubusercontent.com/58792/191573025-72d39f65-4dbb-4cd5-b4a3-80f6f45ff05e.png)
+
+
+
 ## Session 4
 
 * Cloud environments:  GitHub Codespaces, Cloud9, CloudShell
