@@ -3,6 +3,15 @@
 # assimilate-aws
 A deep dive into programmatically mastering AWS
 
+## Session 4
+
+* Cloud environments:  GitHub Codespaces, Cloud9, CloudShell
+* Containers
+* Bash
+
+Goal:  Build a bash cli inside of a container.
+
+
 ## Session 3
 
 * Tackle bootstrap CDK:  https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html
