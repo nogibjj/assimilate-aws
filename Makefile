@@ -7,10 +7,10 @@ test:
 	#python -m pytest -vv test_*.py
 
 format:	
-	black *.py awstools/*.py codewhisper/*.py
+	black *.py awstools/*.py codewhisper/*.py copilot/*.py
 
 lint:
-	pylint --disable=R,C --ignore-patterns=test_.*?py *.py awstools/*.py codewhisper/*.py
+	pylint --disable=R,C --ignore-patterns=test_.*?py *.py awstools/*.py codewhisper/*.py copilot/*.py
 
 refactor: format lint
 
