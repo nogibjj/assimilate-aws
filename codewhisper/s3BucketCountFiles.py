@@ -25,13 +25,16 @@ def count_files(bucket_name):
     bucket = s3.Bucket(bucket_name)
     return sum(1 for _ in bucket.objects.all())
 
-#build click group
+
+# build click group
 @click.group()
 def cli():
     """
     Example:
         $ python s3BucketCountFiles.py --help
     """
+
+
 # build a click command for count
 @cli.command("count")
 def count_cmd():
@@ -39,11 +42,10 @@ def count_cmd():
     This command will print out the number of files in each s3 bucket
     """
     for bucket in list_buckets():
-        #use click colors
+        # use click colors
         click.echo(click.style(f"Bucket: {bucket}", fg="green"))
         click.echo(click.style(f"Files: {count_files(bucket)}", fg="green"))
 
 
 if __name__ == "__main__":
     cli()
-    
